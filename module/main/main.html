@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <title></title>
+    <script src="../../js/mui.min.js"></script>
+    <link href="../../css/mui.min.css" rel="stylesheet"/>
+    <script type="text/javascript" charset="utf-8">
+      	mui.init();
+      	mui.plusReady(function() {
+			console.log("ee");
+			//首页返回键处理
+			//处理逻辑：1秒内，连续两次按返回键，则退出应用；
+			var first = null;
+			plus.key.addEventListener('backbutton', function(){
+				//首次按键，提示‘再按一次退出应用’
+				if(!first){
+					first = new Date().getTime();
+					mui.toast('再按一次退出应用');
+					setTimeout(function(){
+						first = null;
+					},1000);
+				}else{
+					if(new Date().getTime()-first<1000){
+						plus.runtime.quit();
+					}
+				}
+			}, false);
+		});
+    </script>
+</head>
+<body>
+	<div class="mui-content-padded" >
+		<div id="main_head">
+			<h2><font color="#007AFF">利润：500￥</font></h2>
+			<h4>卖出：5单</h4>
+		</div>
+		<div id="searcher" class="mui-input-row mui-search">
+			<input type="search" name="" id="" value="" placeholder="查找产品"/>
+		</div>
+		<div id="sort">
+			<button class="mui-btn">日期<span class="mui-icon mui-icon-arrowup"></span></button>
+			<button class="mui-btn">销量<span class="mui-icon mui-icon-arrowup"></span></button>
+			<button class="mui-btn">货存<span class="mui-icon mui-icon-arrowup"></span></button>
+		</div>
+		<div id="list">
+			<ul class="mui-table-view">
+				<li class="mui-table-view-cell mui-hidden">cared
+					<div id="M_Toggle" class="mui-switch mui-active">
+						<div class="mui-switch-handle">
+							
+						</div>
+					</div>
+				</li>
+				<li class="mui-table-view-cell mui-media">
+					<a href="#">
+						<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/shuijiao.jpg">
+						<div class="mui-media-body">
+							XXX奶粉
+							<p class='mui-ellipsis'>能和心爱的人一起睡觉，是件幸福的事情；可是，打呼噜怎么办？</p>
+						</div>
+					</a>
+				</li>
+				<li class="mui-table-view-cell mui-media">
+					<a href="#">
+						<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/shuijiao.jpg">
+						<div class="mui-media-body">
+							XXX奶粉
+							<p class='mui-ellipsis'>能和心爱的人一起睡觉，是件幸福的事情；可是，打呼噜怎么办？</p>
+						</div>
+					</a>
+				</li>
+				<li class="mui-table-view-cell mui-media">
+					<a href="#">
+						<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/shuijiao.jpg">
+						<div class="mui-media-body">
+							XXX奶粉
+							<p class='mui-ellipsis'>能和心爱的人一起睡觉，是件幸福的事情；可是，打呼噜怎么办？</p>
+						</div>
+					</a>
+				</li>
+				<li class="mui-table-view-cell mui-media">
+					<a href="#">
+						<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/shuijiao.jpg">
+						<div class="mui-media-body">
+							XXX奶粉
+							<p class='mui-ellipsis'>能和心爱的人一起睡觉，是件幸福的事情；可是，打呼噜怎么办？</p>
+						</div>
+					</a>
+				</li>
+				<li class="mui-table-view-cell mui-media">
+					<a href="#">
+						<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/shuijiao.jpg">
+						<div class="mui-media-body">
+							XXX奶粉
+							<p class='mui-ellipsis'>能和心爱的人一起睡觉，是件幸福的事情；可是，打呼噜怎么办？</p>
+						</div>
+					</a>
+				</li>
+				<li class="mui-table-view-cell mui-media">
+					<a href="#">
+						<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/shuijiao.jpg">
+						<div class="mui-media-body">
+							XXX奶粉
+							<p class='mui-ellipsis'>能和心爱的人一起睡觉，是件幸福的事情；可是，打呼噜怎么办？</p>
+						</div>
+					</a>
+				</li>
+				<li class="mui-table-view-cell mui-media">
+					<a href="#">
+						<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/shuijiao.jpg">
+						<div class="mui-media-body">
+							XXX奶粉
+							<p class='mui-ellipsis'>能和心爱的人一起睡觉，是件幸福的事情；可是，打呼噜怎么办？</p>
+						</div>
+					</a>
+				</li>
+				<li class="mui-table-view-cell mui-media">
+					<a href="#">
+						<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/shuijiao.jpg">
+						<div class="mui-media-body">
+							XXX奶粉
+							<p class='mui-ellipsis'>能和心爱的人一起睡觉，是件幸福的事情；可是，打呼噜怎么办？</p>
+						</div>
+					</a>
+				</li>
+				<li class="mui-table-view-cell mui-media">
+					<a href="#">
+						<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/shuijiao.jpg">
+						<div class="mui-media-body">
+							XXX奶粉
+							<p class='mui-ellipsis'>能和心爱的人一起睡觉，是件幸福的事情；可是，打呼噜怎么办？</p>
+						</div>
+					</a>
+				</li>
+				<li class="mui-table-view-cell mui-media">
+					<a href="#">
+						<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/shuijiao.jpg">
+						<div class="mui-media-body">
+							XXX奶粉
+							<p class='mui-ellipsis'>能和心爱的人一起睡觉，是件幸福的事情；可是，打呼噜怎么办？</p>
+						</div>
+					</a>
+				</li>
+				<li class="mui-table-view-cell mui-media">
+					<a href="#">
+						<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/shuijiao.jpg">
+						<div class="mui-media-body">
+							XXX奶粉
+							<p class='mui-ellipsis'>能和心爱的人一起睡觉，是件幸福的事情；可是，打呼噜怎么办？</p>
+						</div>
+					</a>
+				</li>
+				<li class="mui-table-view-cell mui-media">
+					<a href="#">
+						<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/shuijiao.jpg">
+						<div class="mui-media-body">
+							XXX奶粉
+							<p class='mui-ellipsis'>能和心爱的人一起睡觉，是件幸福的事情；可是，打呼噜怎么办？</p>
+						</div>
+					</a>
+				</li>
+			</ul>
+		</div>
+	</div>
+</body>
+</html>

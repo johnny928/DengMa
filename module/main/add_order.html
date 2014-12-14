@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <title></title>
+    <script src="../../js/mui.min.js"></script>
+    <link href="../../css/mui.min.css" rel="stylesheet"/>
+    <script type="text/javascript" charset="utf-8">
+      	mui.init();
+    </script>
+</head>
+<body>
+	<div class="mui-content">
+		<h4>订单号：<span id="ordercode">XXXX</span></h4>
+		<form action="" method="post" class="mui-input-group">
+			<div id="good_name" class="mui-input-row">
+				<label>商品：</label>
+				<select name="gcode">
+					<option value="1">商品1</option>
+					<option value="2">商品2</option>
+					<option value="3">商品3</option>
+					<option value="4">商品4</option>
+					<option value="add">新增</option>
+				</select>
+			</div>
+			<div class="mui-input-row">
+				<label>货源：</label>
+				<select name="scode">
+					<option value="1">货源1</option>
+					<option value="2">货源2</option>
+					<option value="3">货源3</option>
+					<option value="4">货源4</option>
+					<option value="add">新增</option>
+				</select>
+			</div>
+			<div id="good_num" class="mui-input-row">
+				<label>入货价：</label>
+				<input type="text" name="purchase_price" id="purchase_price" value="30￥" />
+			</div>
+			<span>
+				商品订单：
+			</span>
+			<div class="mui-input-row">
+				<label>数量：</label>
+				<input type="text" name="num_order" id="num_order" value="5" />
+			</div>
+			<div class="mui-input-row">
+				<label>运费：</label>
+				<input type="text" name="freight" id="freight" value="5￥" />
+			</div>
+		</form>
+		<a href="" class="mui-btn mui-btn-block mui-btn-primary">确定</a>
+	</div>
+</body>
+</html>
