@@ -9,7 +9,6 @@
     <script type="text/javascript" charset="utf-8">
       	mui.init();
       	mui.plusReady(function() {
-			console.log("ee");
 			//首页返回键处理
 			//处理逻辑：1秒内，连续两次按返回键，则退出应用；
 			var first = null;
@@ -27,7 +26,31 @@
 					}
 				}
 			}, false);
+			
+			var goods_1 = document.getElementById("goods_1");
+			goods_1.addEventListener('tap', function() {
+				console.log("here1");
+			  //打开关于页面
+			  mui.openWindow({
+			    url: 'edit_goods.html', 
+			    id:'goods_1',
+			    extras:{
+			    	gid:1
+			    }
+			  });
+			});
 		});
+//		window.onload = function(){
+//			var goods_1 = document.getElementById("goods_1");
+//			goods_1.addEventListener('tap', function() {
+//				console.log("here2");
+//			  //打开关于页面
+//			  mui.openWindow({
+//			    url: 'edit_goods.html', 
+//			    id:'goods_1'
+//			  });
+//			});
+//		};
     </script>
 </head>
 <body>
@@ -54,7 +77,7 @@
 					</div>
 				</li>
 				<li class="mui-table-view-cell mui-media">
-					<a href="#">
+					<a href="##" id="goods_1">
 						<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/shuijiao.jpg">
 						<div class="mui-media-body">
 							XXX奶粉

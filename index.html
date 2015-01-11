@@ -12,37 +12,15 @@
       	mui.init({
       		swipeBack : false,
       		subpages : [{
-      			id : "module/main/main.html",
-      			url : "module/main/main.html",
+    			id : "module/main/main.html",
+    			url : "module/main/main.html",
       			styles : {
 						top : '48px',
 						bottom : 0,
 						bounce :'vertical'
 						//scrollIndicator : "none"
 					}
-      		}
-      		]
-      	});
-      	var mydb = new Dmdb();
-      	mydb.tableCon("Goods",function(){
-    		var g = mydb.DB.instance("Goods");
-    		var seq=0;
-    		mydb.DB.query("select seq+1 seq from sqlite_sequence where name=?",["Goods"],
-    		function(arr){
-    			seq=arr[0].seq;
-    			console.log("get seq="+seq);
-    			g.insert({id:seq,gcode:"4561",gname:"aa",desc:"this is desc",remain:1,createtime:"2015-01-10 10:54:00"},
-	    		function(e){
-	    			mydb.DB.query("select seq from sqlite_sequence where name=?",["Goods"],
-		    		function(arr){
-		    			seq=arr[0].seq;
-		    			console.log("get seq2="+seq);
-	    			});
-	    		});
-    		});
-    		
-    		
-    		//g.insert({gcode:"4561",gname:"aa",desc:"this is desc",remain:1,createtime:"2015-01-10 10:54:00"},function(e){console.log(e)});
+      		}]
       	});
     </script>
 </head>

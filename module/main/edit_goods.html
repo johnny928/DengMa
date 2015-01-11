@@ -10,36 +10,73 @@
     <link href="../../css/mui.min.css" rel="stylesheet"/>
     <script type="text/javascript" charset="utf-8">
       	mui.init();
-      	window.onload = function(){
-      		console.log(getArgs().id);
-      		var id;
+      	mui.plusReady(function(){
+      		console.log("extras:"+mui.currentWebview.gid);
+      		var id=mui.currentWebview.gid,isInsert=true;
+      		var mydb = new Dmdb();
+      		var gcode = document.getElementById("gcode");
       		var gname = document.getElementById("gname");
   			var remain = document.getElementById("remain");
   			var desc = document.getElementById("desc");
   			var goods_id = document.getElementById("goods_id"); 
-  			if(getArgs().id){
-  				id = getArgs().id;
-  				goods_id.value = id;
-  				var mydb = new Dmdb();
+  			id = id?id:goods_id.value;
+      		goods_id.value = id;
+  			var refresh = function(){
+  				console.log("["+new Date()+"] refresh.");
+  				if(id){
   				mydb.tableCon("Goods",function(){
   					var g = mydb.DB.instance("Goods");
   					g.get("id==="+id,function(row){
   						console.log(row);
-  						gname.value=row[0].gname;
-  						remain.value=row[0].remain;
-  						desc.value=row[0].desc;
-  						goods_id.value=id;
+  						if(row.length>0){
+  							gcode.value=row[0]["gcode"];
+  							gname.value=row[0]["gname"];
+	  						remain.value=row[0]["remain"];
+	  						desc.value=row[0]["desc"];
+	  						goods_id.value=id;
+  						}
   					});
   				});
-  			}
+	  			}
+  			};
+  			refresh();
       		document.getElementById("goods_finish").onclick = function(){
       			var goods = {
+      				id:"",
+      				gcode:gcode.value,
       				gname:gname.value,
       				remain:remain.value,
       				desc:desc.value
       			};
+      			if(id){
+      				isInsert = false;
+      			}else{
+      				isInsert = true;
+      			}
+      			mydb.tableCon("Goods",function(){
+  					var g = mydb.DB.instance("Goods");
+  					mydb.DB.query("select seq+1 seq from sqlite_sequence where name=?",["Goods"],
+  					function(arr){
+  						console.log(arr);
+  						if(isInsert){
+  							id=arr?1:arr[0]["seq"];
+  							goods_id.value=id;
+  							goods["id"]=id;
+  							goods["gcode"]="G"+("00000000"+id).substr((""+id).length);
+  							goods["createtime"]=new Date().Format("yyyy-MM-dd hh:mm:ss");
+  						}else{
+  							goods["id"]=goods_id.value;
+  							goods["gcode"]=gcode.value;
+  							goods["updatetime"]=new Date().Format("yyyy-MM-dd hh:mm:ss");
+  						}
+  						console.log(new Date().Format("yyyy-MM-dd hh:mm:ss")+":[save]"+goods)
+  						g.save(goods,"id",function(){
+  							mui.currentWebview.close();
+  						});
+  					});
+  				});
       		};
-      	}
+      	});
     </script>
 </head>
 <body>
@@ -51,6 +88,7 @@
 		<div id="good_info">
 			<form action="" method="post" class="mui-input-group">
 				<input type="hidden" id="goods_id" value="" />
+				<input type="hidden" id="gcode" value="" />
 				<div class="mui-input-row">
 					<label>产品名称：</label>
 					<input type="text" name="gname" id="gname" value="" placeholder="XXX奶粉"/>
@@ -67,7 +105,7 @@
 				</div>
 			</form>
 		</div>
-		<a id="goods_finish" href="#" class="mui-btn mui-btn-block mui-btn-primary">完成</a>
+		<a id="goods_finish" href="##" class="mui-btn mui-btn-block mui-btn-primary">完成</a>
 	</div>
 </body>
 </html>
