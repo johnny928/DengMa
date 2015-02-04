@@ -5,9 +5,63 @@
     <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
     <title></title>
     <script src="../../js/mui.min.js"></script>
+    <script src="../../js/db/websqlwrapper.js"></script>
+    <script src="../../js/dengma/common.js"></script>
+    <script src="../../js/dengma/dm.js"></script>
+    <script src="../../js/dengma/dm-dbcontrol.js"></script>
+    <script src="../../js/dengma/dm-form.js"></script>
     <link href="../../css/mui.min.css" rel="stylesheet"/>
     <script type="text/javascript" charset="utf-8">
+    /*
+     total_order.html点击添加后进入此页面为订单进行添加具体商品
+     * */
       	mui.init();
+      	window.onload = function(){
+      		var gcode = document.getElementById("gcode");
+      		var scode = document.getElementById("scode");
+      		var mydm = new Dmdb();
+      		var dh = DbHelper.instance(mydm.init());
+      		var reDic = function(obj,dicname){
+      			dh.getDic(dicname,function(arr){
+					gselect(obj,arr);
+				},true);
+      		};
+      		
+			reDic(gcode,"Goods");
+			reDic(scode,"Supplier");
+			
+			gcode.onchange = function(e){
+				console.log("onchange");
+				if(gcode.value=='add'){
+					//打开关于页面
+					mui.openWindow({
+						url: 'edit_goods.html', 
+						id:'add_good',
+					    extras:{}
+					}).onclose = function(e){
+						console.log("["+(new Date()).Format("yyy-MM-dd hh:mm:ss.S")+"]:add_good close");
+						reDic(gcode,"Goods");
+						gcode.value = "";
+					};
+				}
+			};
+			
+			scode.onchange = function(e){
+				console.log("gcode");
+				if(scode.value=='add'){
+					//打开关于页面
+					mui.openWindow({
+						url: 'edit_supplier.html', 
+						id:'add_supplier',
+					    extras:{}
+					}).onclose = function(e){
+						console.log("["+(new Date()).Format("yyy-MM-dd hh:mm:ss.S")+"]:add_good close");
+						reDic(scode,"Supplier");
+						scode.value = "";
+					};
+				}
+			};
+      	}
     </script>
 </head>
 <body>
@@ -16,22 +70,17 @@
 		<form action="" method="post" class="mui-input-group">
 			<div id="good_name" class="mui-input-row">
 				<label>商品：</label>
-				<select name="gcode">
-					<option value="1">商品1</option>
-					<option value="2">商品2</option>
-					<option value="3">商品3</option>
-					<option value="4">商品4</option>
-					<option value="add">新增</option>
+				<select name="gcode" id="gcode" >
+					<option value="" class="dm-not-remove">===请选择===</option>
+					<option value="add" class="dm-not-remove">+++新增+++</option>
 				</select>
+				
 			</div>
 			<div class="mui-input-row">
 				<label>货源：</label>
-				<select name="scode">
-					<option value="1">货源1</option>
-					<option value="2">货源2</option>
-					<option value="3">货源3</option>
-					<option value="4">货源4</option>
-					<option value="add">新增</option>
+				<select name="scode" id="scode">
+					<option value="" class="dm-not-remove">===请选择===</option>
+					<option value="add" class="dm-not-remove">+++新增+++</option>
 				</select>
 			</div>
 			<div id="good_num" class="mui-input-row">

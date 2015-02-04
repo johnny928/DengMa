@@ -6,19 +6,23 @@
     <title></title>
     <script src="../../js/mui.min.js"></script>
     <script src="../../js/db/websqlwrapper.js"></script>
+    <script src="../../js/dengma/common.js"></script>
     <script src="../../js/dengma/dm.js"></script>
     <link href="../../css/mui.min.css" rel="stylesheet"/>
     <script type="text/javascript" charset="utf-8">
       	mui.init();
-      	mui.plusReady(function(){
-      		console.log("extras:"+mui.currentWebview.gid);
-      		var id=mui.currentWebview.gid,isInsert=true;
+      	window.onload = function(){
+      		console.log("extras:"+mui.currentWebview);
+      		var id,isInsert=true;
       		var mydb = new Dmdb();
       		var gcode = document.getElementById("gcode");
       		var gname = document.getElementById("gname");
   			var remain = document.getElementById("remain");
   			var desc = document.getElementById("desc");
   			var goods_id = document.getElementById("goods_id"); 
+  			if(mui.currentWebview){
+  				id =mui.currentWebview.gid;
+  			}
   			id = id?id:goods_id.value;
       		goods_id.value = id;
   			var refresh = function(){
@@ -59,10 +63,10 @@
   					function(arr){
   						console.log(arr);
   						if(isInsert){
-  							id=arr?1:arr[0]["seq"];
+  							id=arr[0]?arr[0]["seq"]:1;
   							goods_id.value=id;
   							goods["id"]=id;
-  							goods["gcode"]="G"+("00000000"+id).substr((""+id).length);
+  							goods["gcode"]="G"+(new Date().Format("yyyyMMdd"))+("00000"+id).substr((""+id).length);
   							goods["createtime"]=new Date().Format("yyyy-MM-dd hh:mm:ss");
   						}else{
   							goods["id"]=goods_id.value;
@@ -76,7 +80,7 @@
   					});
   				});
       		};
-      	});
+      	};
     </script>
 </head>
 <body>

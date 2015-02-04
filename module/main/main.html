@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
     <title></title>
     <script src="../../js/mui.min.js"></script>
+    <script src="../../js/db/websqlwrapper.js"></script>
+    <script src="../../js/dengma/common.js"></script>
+    <script src="../../js/dengma/dm.js"></script>
+    <script src="../../js/dengma/dm-dbcontrol.js"></script>
     <link href="../../css/mui.min.css" rel="stylesheet"/>
     <script type="text/javascript" charset="utf-8">
       	mui.init();
@@ -32,7 +36,7 @@
 				console.log("here1");
 			  //打开关于页面
 			  mui.openWindow({
-			    url: 'edit_goods.html', 
+			    url: 'add_order.html', 
 			    id:'goods_1',
 			    extras:{
 			    	gid:1
@@ -40,6 +44,53 @@
 			  });
 			});
 		});
+		window.onload = function(){
+      		console.log("window onload main ");
+      		var mydm = new Dmdb();
+      		var dh = DbHelper.instance(mydm.init());
+      		var olist = document.getElementById("order_list");
+      		console.log(mui("#order_list li").length);
+      		var btn_queryByDay = function(){
+      			var g = dh.queryOrderByDate({begin:"2015-01-01",end:"2015-02-01",orderby:"desc"},function(r){
+	      			var i=0,k=0,oli=mui("#order_list li");
+	      			for(i=0;i<oli.length;i++){
+	      				if(oli[i].classList.contains("dm-data")){
+	      					oli[i].remove();
+	      				}
+	      			}
+	      			for(i=0;i<r.length;i++){
+	      				var eli = document.createElement("li");
+	      				eli.className ='dm-data mui-table-view-cell mui-media';
+	      				var ea = document.createElement("a");
+	      				ea.href="##";
+	      				ea.id = r[i].ordercode;
+	      				var ediv = document.createElement("div");
+	      				ediv.className = "mui-media-body";
+	      				ediv.innerHTML = r[i].ordercode;
+	      				for(k=0;k<r[i].glist.length;k=k+2){
+	      					var str = r[i].glist[k].gname+"【"+r[i].glist[k].num_order+"】";
+	      					if(r[i].glist[k+1]){
+	      						str = str+"\t"+r[i].glist[k+1].gname+"【"+r[i].glist[k+1].num_order+"】";
+	      					}
+	      					var p_tem = document.createElement("p");
+							p_tem.className="mui-ellipsis";
+							p_tem.textContent=str;
+							ediv.appendChild(p_tem);
+		      				console.log("--->["+r[i].glist[k].gname+"]"+"["+r[i].glist[k].num_order+"]");
+		      			}
+	      				ea.appendChild(ediv);
+	      				eli.appendChild(ea);
+	      				olist.appendChild(eli);
+	      			}
+	      			console.log("r="+r);
+	      			console.log("["+r[0].ordercode+"]"+"["+r[0].cname+"]"+"["+r[0].totalprice+"]");
+	      			for(i=0;i<r[0].glist.length;i++){
+	      				console.log("--->["+r[0].glist[i].gname+"]"+"["+r[0].glist[i].num_order+"]");
+	      			}
+	      		});
+      		}();
+      		
+      	}
 //		window.onload = function(){
 //			var goods_1 = document.getElementById("goods_1");
 //			goods_1.addEventListener('tap', function() {
@@ -56,8 +107,8 @@
 <body>
 	<div class="mui-content-padded" >
 		<div id="main_head">
-			<h2><font color="#007AFF">利润：500￥</font></h2>
-			<h4>卖出：5单</h4>
+			<h2><font color="#007AFF">利润：<span id="lr"></span>￥</font></h2>
+			<h4>卖出：<span id="mcds"></span>单</h4>
 		</div>
 		<div id="searcher" class="mui-input-row mui-search">
 			<input type="search" name="" id="" value="" placeholder="查找产品"/>
@@ -68,7 +119,7 @@
 			<button class="mui-btn">货存<span class="mui-icon mui-icon-arrowup"></span></button>
 		</div>
 		<div id="list">
-			<ul class="mui-table-view">
+			<ul class="mui-table-view" id="order_list">
 				<li class="mui-table-view-cell mui-hidden">cared
 					<div id="M_Toggle" class="mui-switch mui-active">
 						<div class="mui-switch-handle">
@@ -76,16 +127,16 @@
 						</div>
 					</div>
 				</li>
-				<li class="mui-table-view-cell mui-media">
+				<li class="dm-data mui-table-view-cell mui-media">
 					<a href="##" id="goods_1">
-						<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/shuijiao.jpg">
 						<div class="mui-media-body">
-							XXX奶粉
-							<p class='mui-ellipsis'>能和心爱的人一起睡觉，是件幸福的事情；可是，打呼噜怎么办？</p>
+							O-X1
+							<p class='mui-ellipsis'>澳洲奶粉1段【5】	木瓜膏【6】</p>
+							<p class='mui-ellipsis'>澳洲奶粉1段【5】	木瓜膏【6】</p>
 						</div>
 					</a>
 				</li>
-				<li class="mui-table-view-cell mui-media">
+				<li class="dm-data mui-table-view-cell mui-media">
 					<a href="#">
 						<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/shuijiao.jpg">
 						<div class="mui-media-body">
@@ -94,7 +145,7 @@
 						</div>
 					</a>
 				</li>
-				<li class="mui-table-view-cell mui-media">
+				<li class="dm-data mui-table-view-cell mui-media">
 					<a href="#">
 						<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/shuijiao.jpg">
 						<div class="mui-media-body">
@@ -103,7 +154,7 @@
 						</div>
 					</a>
 				</li>
-				<li class="mui-table-view-cell mui-media">
+				<li class="dm-data mui-table-view-cell mui-media">
 					<a href="#">
 						<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/shuijiao.jpg">
 						<div class="mui-media-body">
@@ -112,7 +163,7 @@
 						</div>
 					</a>
 				</li>
-				<li class="mui-table-view-cell mui-media">
+				<li class="dm-data mui-table-view-cell mui-media">
 					<a href="#">
 						<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/shuijiao.jpg">
 						<div class="mui-media-body">
@@ -121,7 +172,7 @@
 						</div>
 					</a>
 				</li>
-				<li class="mui-table-view-cell mui-media">
+				<li class="dm-data mui-table-view-cell mui-media">
 					<a href="#">
 						<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/shuijiao.jpg">
 						<div class="mui-media-body">
@@ -130,7 +181,7 @@
 						</div>
 					</a>
 				</li>
-				<li class="mui-table-view-cell mui-media">
+				<li class="dm-data mui-table-view-cell mui-media">
 					<a href="#">
 						<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/shuijiao.jpg">
 						<div class="mui-media-body">
@@ -139,7 +190,7 @@
 						</div>
 					</a>
 				</li>
-				<li class="mui-table-view-cell mui-media">
+				<li class="dm-data mui-table-view-cell mui-media">
 					<a href="#">
 						<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/shuijiao.jpg">
 						<div class="mui-media-body">
@@ -148,7 +199,7 @@
 						</div>
 					</a>
 				</li>
-				<li class="mui-table-view-cell mui-media">
+				<li class="dm-data mui-table-view-cell mui-media">
 					<a href="#">
 						<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/shuijiao.jpg">
 						<div class="mui-media-body">
@@ -157,7 +208,7 @@
 						</div>
 					</a>
 				</li>
-				<li class="mui-table-view-cell mui-media">
+				<li class="dm-data mui-table-view-cell mui-media">
 					<a href="#">
 						<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/shuijiao.jpg">
 						<div class="mui-media-body">
@@ -166,7 +217,7 @@
 						</div>
 					</a>
 				</li>
-				<li class="mui-table-view-cell mui-media">
+				<li class="dm-data mui-table-view-cell mui-media">
 					<a href="#">
 						<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/shuijiao.jpg">
 						<div class="mui-media-body">
@@ -175,7 +226,7 @@
 						</div>
 					</a>
 				</li>
-				<li class="mui-table-view-cell mui-media">
+				<li class="dm-data mui-table-view-cell mui-media">
 					<a href="#">
 						<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/shuijiao.jpg">
 						<div class="mui-media-body">

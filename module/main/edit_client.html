@@ -5,9 +5,78 @@
     <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
     <title></title>
     <script src="../../js/mui.min.js"></script>
+    <script src="../../js/db/websqlwrapper.js"></script>
+    <script src="../../js/dengma/common.js"></script>
+    <script src="../../js/dengma/dm.js"></script>
     <link href="../../css/mui.min.css" rel="stylesheet"/>
     <script type="text/javascript" charset="utf-8">
       	mui.init();
+      	window.onload = function(){
+      		if(!mui.currentWebview) mui.currentWebview=getArgs();
+      		console.log("extras:"+mui.currentWebview.cid);
+      		var id=mui.currentWebview.cid,isInsert=true;
+      		var mydb = new Dmdb();
+      		var ccode = document.getElementById("ccode");
+      		var cname = document.getElementById("cname");
+  			var desc = document.getElementById("desc");
+  			var client_id = document.getElementById("client_id"); 
+  			id = id?id:client_id.value;
+      		client_id.value = id;
+  			var refresh = function(){
+  				console.log("["+new Date()+"] refresh.");
+  				if(id){
+  				mydb.tableCon("Clients",function(){
+  					var g = mydb.DB.instance("Clients");
+  					g.get("id==="+id,function(row){
+  						console.log(row);
+  						if(row.length>0){
+  							ccode.value=row[0]["ccode"];
+  							cname.value=row[0]["cname"];
+	  						desc.value=row[0]["desc"];
+	  						client_id.value=id;
+  						}
+  					});
+  				});
+	  			}
+  			};
+  			refresh();
+      		document.getElementById("clients_finish").onclick = function(){
+      			var clients = {
+      				id:"",
+      				ccode:ccode.value,
+      				cname:cname.value,
+      				desc:desc.value
+      			};
+      			if(id){
+      				isInsert = false;
+      			}else{
+      				isInsert = true;
+      			}
+      			mydb.tableCon("Clients",function(){
+  					var g = mydb.DB.instance("Clients");
+  					mydb.DB.query("select seq+1 seq from sqlite_sequence where name=?",["Clients"],
+  					function(arr){
+  						console.log(arr);
+  						if(isInsert){
+  							id=arr[0]?arr[0]["seq"]:1;
+  							client_id.value=id;
+  							clients["id"]=id;
+  							clients["ccode"]="C"+(new Date().Format("yyyyMMdd"))+("00000"+id).substr((""+id).length);
+  							clients["createtime"]=new Date().Format("yyyy-MM-dd hh:mm:ss");
+  						}else{
+  							clients["id"]=client_id.value;
+  							clients["ccode"]=ccode.value;
+  							clients["updatetime"]=new Date().Format("yyyy-MM-dd hh:mm:ss");
+  						}
+  						console.log(new Date().Format("yyyy-MM-dd hh:mm:ss")+":[save]"+clients)
+  						g.save(clients,"id",function(){
+							//mui.currentWebview.close();
+							refresh();
+  						});
+  					});
+  				});
+      		};
+      	};
     </script>
 </head>
 <body>
@@ -18,17 +87,19 @@
 		</div>
 		<div id="client_info">
 			<form action="" method="post" class="mui-input-group">
+				<input type="hidden" id="client_id" value="" />
+				<input type="hidden" id="ccode" value="" />
 				<div class="mui-input-row">
 					<label>客户名称：</label>
 					<input type="text" name="cname" id="cname" value="" placeholder="XXX奶粉"/>
 				</div>
 				<div class="mui-input-row">
 					<label>描述：</label>
-					<textarea name="desc" rows="5" cols="" placeholder="描述"></textarea>
+					<textarea name="desc" id="desc" rows="5" cols="" placeholder="描述"></textarea>
 				</div>
 			</form>
 		</div>
-		<a href="" class="mui-btn mui-btn-block mui-btn-primary">完成</a>
+		<a id="clients_finish" href="##" class="mui-btn mui-btn-block mui-btn-primary">完成</a>
 	</div>
 </body>
 </html>

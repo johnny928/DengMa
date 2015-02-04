@@ -5,9 +5,78 @@
     <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
     <title></title>
     <script src="../../js/mui.min.js"></script>
+    <script src="../../js/db/websqlwrapper.js"></script>
+    <script src="../../js/dengma/common.js"></script>
+    <script src="../../js/dengma/dm.js"></script>
     <link href="../../css/mui.min.css" rel="stylesheet"/>
     <script type="text/javascript" charset="utf-8">
       	mui.init();
+      	window.onload = function(){
+      		if(!mui.currentWebview) mui.currentWebview=getArgs();
+      		console.log("extras:"+mui.currentWebview.cid);
+      		var id=mui.currentWebview.cid,isInsert=true;
+      		var mydb = new Dmdb();
+      		var scode = document.getElementById("scode");
+      		var sname = document.getElementById("sname");
+  			var desc = document.getElementById("desc");
+  			var supplier_id = document.getElementById("supplier_id"); 
+  			id = id?id:supplier_id.value;
+      		supplier_id.value = id;
+  			var refresh = function(){
+  				console.log("["+new Date()+"] refresh.");
+  				if(id){
+  				mydb.tableCon("Supplier",function(){
+  					var g = mydb.DB.instance("Supplier");
+  					g.get("id==="+id,function(row){
+  						console.log(row);
+  						if(row.length>0){
+  							scode.value=row[0]["scode"];
+  							sname.value=row[0]["sname"];
+	  						desc.value=row[0]["desc"];
+	  						supplier_id.value=id;
+  						}
+  					});
+  				});
+	  			}
+  			};
+  			refresh();
+      		document.getElementById("supplier_finish").onclick = function(){
+      			var supplier = {
+      				id:"",
+      				scode:scode.value,
+      				sname:sname.value,
+      				desc:desc.value
+      			};
+      			if(id){
+      				isInsert = false;
+      			}else{
+      				isInsert = true;
+      			}
+      			mydb.tableCon("Supplier",function(){
+  					var g = mydb.DB.instance("Supplier");
+  					mydb.DB.query("select seq+1 seq from sqlite_sequence where name=?",["Supplier"],
+  					function(arr){
+  						console.log(arr);
+  						if(isInsert){
+  							id=arr[0]?arr[0]["seq"]:1;
+  							supplier_id.value=id;
+  							supplier["id"]=id;
+  							supplier["scode"]="S"+(new Date().Format("yyyyMMdd"))+("00000"+id).substr((""+id).length);
+  							supplier["createtime"]=new Date().Format("yyyy-MM-dd hh:mm:ss");
+  						}else{
+  							supplier["id"]=supplier_id.value;
+  							supplier["scode"]=scode.value;
+  							supplier["updatetime"]=new Date().Format("yyyy-MM-dd hh:mm:ss");
+  						}
+  						console.log(new Date().Format("yyyy-MM-dd hh:mm:ss")+":[save]"+supplier)
+  						g.save(supplier,"id",function(){
+							mui.currentWebview.close();
+							//refresh();
+  						});
+  					});
+  				});
+      		};
+      	};
     </script>
 </head>
 <body>
@@ -18,17 +87,19 @@
 		</div>
 		<div id="supplier_info">
 			<form action="" method="post" class="mui-input-group">
+				<input type="hidden" id="supplier_id" value="" />
+				<input type="hidden" id="scode" value="" />
 				<div class="mui-input-row">
 					<label>供货商名称：</label>
 					<input type="text" name="sname" id="sname" value="" placeholder="XXX奶粉"/>
 				</div>
 				<div class="mui-input-row">
 					<label>描述：</label>
-					<textarea name="desc" rows="5" cols="" placeholder="描述"></textarea>
+					<textarea name="desc" id="desc" rows="5" cols="" placeholder="描述"></textarea>
 				</div>
 			</form>
 		</div>
-		<a href="" class="mui-btn mui-btn-block mui-btn-primary">完成</a>
+		<a id="supplier_finish" href="##" class="mui-btn mui-btn-block mui-btn-primary">完成</a>
 	</div>
 </body>
 </html>

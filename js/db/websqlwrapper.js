@@ -53,6 +53,7 @@
         emptyHandle = function(){};
         errorHandle = function( tx, err, sql ){
             log( '最后一句异常 SQL: ' + sql );
+            log( 'Error: [' + err.code+"]"+err.message );
         };
 
         // 转换 a === b && b == c 语句成sql语法
@@ -362,6 +363,71 @@
          */
         , instance: function(tableName){
             return new Table(tableName, this.db, this);
+        }
+        , execSql: function(transaction,sql, rowParam, cb){
+            var params = []
+            , isSave = false
+            , self = this
+            , cmdStr
+            ;
+            if(Utils.is.Function(rowParam)){
+                cb = rowParam;
+            }
+            if(Utils.is.Array(rowParam)){
+                params = rowParam;
+            }
+            if(!cb){
+                cb = emptyHandle;
+            }
+            log(sql, params);
+            transaction.executeSql(sql, params, function(tx, results){
+                var arr = [], row, i;
+                for (i=0; i<results.rows.length; i++) {   
+                    row = results.rows.item(i); 
+                   arr.push(row);
+                }
+                cb(arr);
+            }
+            , function(tx, e){
+                cb(null);
+                errorHandle.apply(this, [tx, e, sql]);
+            }); 
+            return this;
+        }
+        /**
+         * [batchSyn 批量同步]
+         * @param {[Object]} arr [[{sql:"",args:[],setArgs:function(r){},callback:function(r){}},{..},..]]
+         * @param {[Function]} cb [总：回调函数]
+         */
+        , batchSyn: function(arr,cb){
+        	var i=0,alen,rcach=[];
+            if(!Utils.is.Array(arr)||arr.length==0) {
+                return ;
+            }
+			this.db.transaction(  
+                function (transaction) {  
+		            alen=arr.length;
+		            var cbtem = function(_i){
+		            	if(arr[_i].setArgs){
+		            		arr[_i].args = arr[_i].setArgs(rcach);
+		            	}
+		            	var _fn = function(r){
+		            		rcach[_i] = r;
+		            		if(i==(alen-1)){
+		            			cb(rcach);
+		            		}else{
+		            			if(arr[_i].callback){
+		            				arr[_i].callback(rcach);
+		            			}
+		            			i++;
+		            			cbtem(i);
+		            		}
+		            	};
+		            	this["execSql"](transaction,arr[_i].sql,arr[_i].args, _fn);
+		            }.bind(this);
+		            cbtem(0);
+	        }.bind(this));
+            return this;
         }
     };
 

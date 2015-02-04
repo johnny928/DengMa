@@ -5,82 +5,139 @@
     <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
     <title></title>
     <script src="../../js/mui.min.js"></script>
+    <script src="../../js/db/websqlwrapper.js"></script>
+    <script src="../../js/dengma/common.js"></script>
+    <script src="../../js/dengma/dm.js"></script>
+    <script src="../../js/dengma/dm-dbcontrol.js"></script>
+    <script src="../../js/dengma/dm-form.js"></script>
+    <script src="../../js/math.min.js"></script>
     <link href="../../css/mui.min.css" rel="stylesheet"/>
     <script type="text/javascript" charset="utf-8">
+    /*
+     新增订单
+     * */
       	mui.init();
+      	window.onload = function(){
+      		var ordercode="O-000000001",odetail={};
+      		if(mui.currentWebview){
+  				ordercode =mui.currentWebview.ordercode;
+  			}
+      		var ccode = document.getElementById("ccode");
+      		var mydm = new Dmdb();
+      		var dh = DbHelper.instance(mydm.init());
+      		var reDic = function(obj,dicname){
+      			dh.getDic(dicname,function(arr){
+					gselect(obj,arr);
+				},true);
+      		};
+      		
+			reDic(ccode,"Clients");
+      		ccode.onchange = function(e){
+				console.log("onchange");
+				if(ccode.value=='add'){
+					//打开关于页面
+					mui.openWindow({
+						url: 'edit_client.html', 
+						id:'add_client',
+					    extras:{}
+					}).onclose = function(e){
+						console.log("["+(new Date()).Format("yyy-MM-dd hh:mm:ss.S")+"]:add_good close");
+						reDic(ccode,"Clients");
+						ccode.value = "";
+					};
+				}
+			};
+			console.log(mui("#orders_list")[0]);
+			if(ordercode){
+				dh.getOrderDetail(ordercode,function(r){
+					var tprice=0,tsprice=0;
+					odetail = r;
+					oderDetailList(odetail);
+					odetail.orders.forEach(function(e){
+						tprice = math.chain(Number(e.marked_price)).multiply(Number(e.num_order)).add(tprice).done();
+						tsprice = math.chain(Number(e.selling_price)).multiply(Number(e.num_order)).add(tsprice).done();
+					});
+					mui("#ordercode")[0].innerText = ordercode;
+					mui("#ccode")[0].value = odetail.totalorder[0].ccode;
+					mui("#freight")[0].value = "";
+					mui("#price_org")[0].value = tprice;
+					mui("#total_price")[0].value = tsprice;
+				});
+			}
+      	}
     </script>
 </head>
 <body>
 	<div class="mui-content">
-		<h4>订单号：<span id="ordercode">XXXX</span></h4>
+		<h4>订单号：<span id="ordercode"></span></h4>
 		<form action="" method="post" class="mui-input-group">
-			<div id="cname" class="mui-input-row">
+			<div class="mui-input-row">
 				<label>客户：</label>
-				<select name="ccode">
-					<option value="1">客户1</option>
-					<option value="2">客户2</option>
-					<option value="3">客户3</option>
-					<option value="4">客户4</option>
-					<option value="add">新增</option>
+				<select name="ccode" id="ccode">
+					<option value="" class="dm-not-remove">===请选择===</option>
+					<option value="add" class="dm-not-remove">+++新增+++</option>
 				</select>
 			</div>
 		</form>
-		<span id="">
-			商品：
-		</span>
-		<form action="" method="post" class="mui-input-group">
-			<ul class="mui-table-view">
-				<li class="mui-table-view-cell mui-hidden">cared
-					<div id="M_Toggle" class="mui-switch mui-active">
-						<div class="mui-switch-handle">
+		<a href="" class="mui-btn mui-btn-block mui-btn-positive">确定</a>
+		<div id="o_detail">
+			<span id="">
+				商品：
+			</span>
+			<form action="" method="post" class="mui-input-group">
+				<ul class="mui-table-view" id="orders_list">
+					<li class="mui-table-view-cell mui-hidden">cared
+						<div id="M_Toggle" class="mui-switch mui-active">
+							<div class="mui-switch-handle">
+							</div>
 						</div>
-					</div>
-				</li>
-				<li class="mui-table-view-cell mui-media">
-					<a href="#">
-						<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/shuijiao.jpg">
-						<div class="mui-media-body">
-							<span id="gname">XXX奶粉</span>
-							<span class="mui-pull-right">数量：<span id="num_order" >5</span> </span>
-							<span class="mui-pull-right">售价：<span id="selling_price">45￥</span></span>
-							<p class='mui-ellipsis'>
-								入货价：<span id="purchase_price">30￥</span>
-								标价：<span id="marked_price">30￥</span>
-							</p>
-						</div>
-					</a>
-				</li>
-				<li class="mui-table-view-cell mui-media">
-					<a href="#">
-						<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/shuijiao.jpg">
-						<div class="mui-media-body">
-							<span id="gname">XXX奶粉</span>
-							<span class="mui-pull-right">数量：<span id="num_order" >5</span> </span>
-							<span class="mui-pull-right">售价：<span id="selling_price">45￥</span></span>
-							<p class='mui-ellipsis'>
-								入货价：<span id="purchase_price">30￥</span>
-								标价：<span id="marked_price">30￥</span>
-							</p>
-						</div>
-					</a>
-				</li>
-			</ul>
-		</form>
-		<form action="" method="post" class="mui-input-group">
-			<div id="freight" class="mui-input-row">
-				<label>运费：</label>
-				<input type="text" name="" id="" value="" placeholder="运费"/>
-			</div>
-			<div id="price_org" class="mui-input-row">
-				<label>总价（原价）：</label>
-				<input type="text" name="" id="" value="120￥" readonly="true"/>
-			</div>
-			<div id="total_price" class="mui-input-row">
-				<label>总价（折后）：</label>
-				<input type="text" name="" id="" value="100￥" readonly="true"/>
-			</div>
-		</form>
-		<a href="" class="mui-btn mui-btn-block mui-btn-primary">添加</a>
+					</li>
+					<li class="dm-data mui-table-view-cell mui-media">
+						<a href="#">
+							<div class="mui-media-body">
+								<span>XXX奶粉</span>
+								<span class="mui-pull-right">数量：5 </span>
+								<span class="mui-pull-right">售价：45￥</span>
+								<p class='mui-ellipsis'>
+									入货价：30￥
+									标价：30￥
+								</p>
+							</div>
+						</a>
+					</li>
+					<li class="dm-data mui-table-view-cell mui-media">
+						<a href="#">
+							<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/shuijiao.jpg">
+							<div class="mui-media-body">
+								<span id="gname">XXX奶粉</span>
+								<span class="mui-pull-right">数量：<span id="num_order" >5</span> </span>
+								<span class="mui-pull-right">售价：<span id="selling_price">45￥</span></span>
+								<p class='mui-ellipsis'>
+									入货价：<span id="purchase_price">30￥</span>
+									标价：<span id="marked_price">30￥</span>
+								</p>
+							</div>
+						</a>
+					</li>
+				</ul>
+			</form>
+			<a href="" class="mui-btn mui-btn-block">添加商品</a>
+			<form action="" method="post" class="mui-input-group">
+				<div class="mui-input-row">
+					<label>运费：</label>
+					<input type="text" name="freight" id="freight" value="" placeholder="运费"/>
+				</div>
+				<div class="mui-input-row">
+					<label>总价（原价）￥：</label>
+					<input type="text" name="price_org" id="price_org" value="120" readonly="true"/>
+				</div>
+				<div class="mui-input-row">
+					<label>总价（折后）￥：</label>
+					<input type="text" name="total_price" id="total_price" value="100" readonly="true"/>
+				</div>
+			</form>
+			<a href="" class="mui-btn mui-btn-block mui-btn-primary">保存</a>
+		</div>
 	</div>
 </body>
 </html>
