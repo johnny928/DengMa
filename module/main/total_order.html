@@ -12,59 +12,114 @@
     <script src="../../js/dengma/dm-form.js"></script>
     <script src="../../js/math.min.js"></script>
     <link href="../../css/mui.min.css" rel="stylesheet"/>
+    <style>
+    	.dm-input-row label{
+    		width:50%
+    	}
+		.dm-input-row lable~input{
+			width:50%;
+		}
+    </style>
     <script type="text/javascript" charset="utf-8">
     /*
      新增订单
      * */
       	mui.init();
       	window.onload = function(){
-      		var ordercode="O-000000001",odetail={};
-      		if(mui.currentWebview){
-  				ordercode =mui.currentWebview.ordercode;
-  			}
-      		var ccode = document.getElementById("ccode");
-      		var mydm = new Dmdb();
-      		var dh = DbHelper.instance(mydm.init());
-      		var reDic = function(obj,dicname){
-      			dh.getDic(dicname,function(arr){
-					gselect(obj,arr);
-				},true);
-      		};
-      		
-			reDic(ccode,"Clients");
-      		ccode.onchange = function(e){
-				console.log("onchange");
-				if(ccode.value=='add'){
+      		document.addEventListener("plusready",function(){
+      			var cur = plus.webview.currentWebview();
+      			console.log("total_order:webviewid="+cur.id);
+	      		var ordercode,odetail={};
+	      		if(cur){
+	  				ordercode =cur.ordercode;
+	  			}else{
+	  				ordercode = plus.webview.currentWebview().ordercode;
+	  			}
+	      		var ccode = document.getElementById("ccode");
+	      		var mydm = new Dmdb();
+	      		var dh = DbHelper.instance(mydm.init());
+	      		var reDic = function(obj,dicname){
+	      			dh.getDic(dicname,function(arr){
+						gselect(obj,arr);
+					},true);
+	      		};
+	      		
+				reDic(ccode,"Clients");
+	      		ccode.onchange = function(e){
+					console.log("onchange");
+					if(ccode.value=='add'){
+						//打开关于页面
+						mui.openWindow({
+							url: 'edit_client.html', 
+							id:'add_client',
+						    extras:{},
+						    styles:{zindex:999}
+						}).onclose = function(e){
+							console.log("["+(new Date()).Format("yyy-MM-dd hh:mm:ss.S")+"]:add_good close");
+							reDic(ccode,"Clients");
+							ccode.value = "";
+						};
+					}
+				};
+				
+				console.log(mui("#orders_list")[0]);
+				var refresh = function(){
+					if(ordercode){
+						mui("#createOrder")[0].style.display = "none";
+						mui("#o_detail")[0].style.display = "block";
+						dh.getOrderDetail(ordercode,function(r){
+							var tprice=0,tsprice=0;
+							odetail = r;
+							oderDetailList(odetail);
+							odetail.orders.forEach(function(e){
+								tprice = math.chain(Number(e.marked_price)).multiply(Number(e.num_order)).add(tprice).done();
+								tsprice = math.chain(Number(e.selling_price)).multiply(Number(e.num_order)).add(tsprice).done();
+							});
+							mui("#ordercode")[0].innerText = ordercode;
+							mui("#ccode")[0].value = odetail.totalorder[0].ccode;
+							mui("#freight")[0].value = "";
+							mui("#price_org")[0].value = tprice;
+							mui("#total_price")[0].value = tsprice;
+						});
+					}else{
+						mui("#createOrder")[0].style.display = "block";
+						mui("#o_detail")[0].style.display = "none";
+					}
+				};
+				refresh();
+				mui("#createOrder")[0].addEventListener("tap", function(e){
+					var _ccode=mui("#ccode")[0].value,arg={ccode:_ccode};
+					mui("#ccode")[0].readOnly = true;
+					dh.createOrder(arg,function(r){
+						ordercode=r.ordercode;
+						refresh();
+					});
+				});
+				mui("#add_order")[0].addEventListener("tap", function(e){
+					console.log("add_order");
 					//打开关于页面
 					mui.openWindow({
-						url: 'edit_client.html', 
-						id:'add_client',
-					    extras:{}
+						url: 'add_order.html', 
+						id:'total_order_add_order',
+					    extras:{
+					    	ordercode:ordercode,
+					    	actType:"add"
+					    },
+						styles:{zindex:999}
 					}).onclose = function(e){
-						console.log("["+(new Date()).Format("yyy-MM-dd hh:mm:ss.S")+"]:add_good close");
-						reDic(ccode,"Clients");
-						ccode.value = "";
+						console.log("["+(new Date()).Format("yyy-MM-dd hh:mm:ss.S")+"]:add_order close");
+						refresh();
 					};
-				}
-			};
-			console.log(mui("#orders_list")[0]);
-			if(ordercode){
-				dh.getOrderDetail(ordercode,function(r){
-					var tprice=0,tsprice=0;
-					odetail = r;
-					oderDetailList(odetail);
-					odetail.orders.forEach(function(e){
-						tprice = math.chain(Number(e.marked_price)).multiply(Number(e.num_order)).add(tprice).done();
-						tsprice = math.chain(Number(e.selling_price)).multiply(Number(e.num_order)).add(tsprice).done();
-					});
-					mui("#ordercode")[0].innerText = ordercode;
-					mui("#ccode")[0].value = odetail.totalorder[0].ccode;
-					mui("#freight")[0].value = "";
-					mui("#price_org")[0].value = tprice;
-					mui("#total_price")[0].value = tsprice;
 				});
-			}
-      	}
+				mui("#save_order")[0].addEventListener("tap",  function(e){
+					console.log("total_order:save_order:webview id="+cur.id);
+					var opener = plus.webview.currentWebview().opener();
+					console.log("total_order:save_order:opener id="+opener.id);
+	      			//mui.fire(opener,'refresh');
+	      			opener.reload(true);
+					cur.close();
+				});
+      	},false);}
     </script>
 </head>
 <body>
@@ -75,11 +130,11 @@
 				<label>客户：</label>
 				<select name="ccode" id="ccode">
 					<option value="" class="dm-not-remove">===请选择===</option>
-					<option value="add" class="dm-not-remove">+++新增+++</option>
+					<option value="add" class="dm-not-remove" id="ccode_add">+++新增+++</option>
 				</select>
 			</div>
 		</form>
-		<a href="" class="mui-btn mui-btn-block mui-btn-positive">确定</a>
+		<a href="##" class="mui-btn mui-btn-block mui-btn-positive" id="createOrder">确定</a>
 		<div id="o_detail">
 			<span id="">
 				商品：
@@ -92,51 +147,24 @@
 							</div>
 						</div>
 					</li>
-					<li class="dm-data mui-table-view-cell mui-media">
-						<a href="#">
-							<div class="mui-media-body">
-								<span>XXX奶粉</span>
-								<span class="mui-pull-right">数量：5 </span>
-								<span class="mui-pull-right">售价：45￥</span>
-								<p class='mui-ellipsis'>
-									入货价：30￥
-									标价：30￥
-								</p>
-							</div>
-						</a>
-					</li>
-					<li class="dm-data mui-table-view-cell mui-media">
-						<a href="#">
-							<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/shuijiao.jpg">
-							<div class="mui-media-body">
-								<span id="gname">XXX奶粉</span>
-								<span class="mui-pull-right">数量：<span id="num_order" >5</span> </span>
-								<span class="mui-pull-right">售价：<span id="selling_price">45￥</span></span>
-								<p class='mui-ellipsis'>
-									入货价：<span id="purchase_price">30￥</span>
-									标价：<span id="marked_price">30￥</span>
-								</p>
-							</div>
-						</a>
-					</li>
 				</ul>
 			</form>
-			<a href="" class="mui-btn mui-btn-block">添加商品</a>
+			<a href="##" class="mui-btn mui-btn-block" id="add_order">添加商品</a>
 			<form action="" method="post" class="mui-input-group">
 				<div class="mui-input-row">
 					<label>运费：</label>
 					<input type="text" name="freight" id="freight" value="" placeholder="运费"/>
 				</div>
-				<div class="mui-input-row">
+				<div class="mui-input-row dm-input-row">
 					<label>总价（原价）￥：</label>
-					<input type="text" name="price_org" id="price_org" value="120" readonly="true"/>
+					<input type="text" name="price_org" id="price_org" value="0" readonly="true"/>
 				</div>
-				<div class="mui-input-row">
+				<div class="mui-input-row dm-input-row">
 					<label>总价（折后）￥：</label>
-					<input type="text" name="total_price" id="total_price" value="100" readonly="true"/>
+					<input type="text" name="total_price" id="total_price" value="0" readonly="true"/>
 				</div>
 			</form>
-			<a href="" class="mui-btn mui-btn-block mui-btn-primary">保存</a>
+			<a href="##" class="mui-btn mui-btn-block mui-btn-primary" id="save_order">保存</a>
 		</div>
 	</div>
 </body>

@@ -5,68 +5,122 @@
     <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
     <title></title>
     <script src="../../js/mui.min.js"></script>
+    <script src="../../js/math.min.js"></script>
     <script src="../../js/db/websqlwrapper.js"></script>
     <script src="../../js/dengma/common.js"></script>
     <script src="../../js/dengma/dm.js"></script>
     <script src="../../js/dengma/dm-dbcontrol.js"></script>
     <script src="../../js/dengma/dm-form.js"></script>
     <link href="../../css/mui.min.css" rel="stylesheet"/>
+    <style>
+    	.dm-input-row label{
+    		width:50%
+    	}
+		.dm-input-row lable~input{
+			width:50%;
+		}
+    </style>
     <script type="text/javascript" charset="utf-8">
     /*
      total_order.html点击添加后进入此页面为订单进行添加具体商品
      * */
       	mui.init();
       	window.onload = function(){
-      		var gcode = document.getElementById("gcode");
-      		var scode = document.getElementById("scode");
-      		var mydm = new Dmdb();
-      		var dh = DbHelper.instance(mydm.init());
-      		var reDic = function(obj,dicname){
-      			dh.getDic(dicname,function(arr){
-					gselect(obj,arr);
-				},true);
-      		};
-      		
-			reDic(gcode,"Goods");
-			reDic(scode,"Supplier");
-			
-			gcode.onchange = function(e){
-				console.log("onchange");
-				if(gcode.value=='add'){
-					//打开关于页面
-					mui.openWindow({
-						url: 'edit_goods.html', 
-						id:'add_good',
-					    extras:{}
-					}).onclose = function(e){
-						console.log("["+(new Date()).Format("yyy-MM-dd hh:mm:ss.S")+"]:add_good close");
-						reDic(gcode,"Goods");
-						gcode.value = "";
-					};
-				}
-			};
-			
-			scode.onchange = function(e){
-				console.log("gcode");
-				if(scode.value=='add'){
-					//打开关于页面
-					mui.openWindow({
-						url: 'edit_supplier.html', 
-						id:'add_supplier',
-					    extras:{}
-					}).onclose = function(e){
-						console.log("["+(new Date()).Format("yyy-MM-dd hh:mm:ss.S")+"]:add_good close");
-						reDic(scode,"Supplier");
-						scode.value = "";
-					};
-				}
-			};
-      	}
+      		document.addEventListener("plusready",function(){
+	      		var ordercode,actType,orderid;
+				var cur = plus.webview.currentWebview();
+	      		var gcode = document.getElementById("gcode");
+	      		var scode = document.getElementById("scode");
+	      		var mydm = new Dmdb();
+	      		var dh = DbHelper.instance(mydm.init());
+	      		var reDic = function(obj,dicname){
+	      			dh.getDic(dicname,function(arr){
+						gselect(obj,arr);
+					},true);
+	      		};
+				ordercode =cur.ordercode;
+				actType =cur.actType;
+				orderid =cur.orderid||"";
+				console.log("ordercode="+ordercode);
+				console.log("actType="+actType);
+				console.log("orderid="+orderid);
+	      		console.log("actType="+actType);
+	      		
+	      		mui("#ordercode")[0].textContent = ordercode?ordercode:"";
+				reDic(gcode,"Goods");
+				reDic(scode,"Supplier");
+				
+				gcode.onchange = function(e){
+					console.log("onchange");
+					if(gcode.value=='add'){
+						//打开关于页面
+						mui.openWindow({
+							url: 'edit_goods.html', 
+							id:'add_good',
+						    extras:{},
+						    styles:{zindex:999}
+						}).onclose = function(e){
+							console.log("["+(new Date()).Format("yyy-MM-dd hh:mm:ss.S")+"]:add_good close");
+							reDic(gcode,"Goods");
+							gcode.value = "";
+						};
+					}
+				};
+				
+				scode.onchange = function(e){
+					console.log("gcode");
+					if(scode.value=='add'){
+						//打开关于页面
+						mui.openWindow({
+							url: 'edit_supplier.html', 
+							id:'add_supplier',
+						    extras:{},
+						    styles:{zindex:999}
+						}).onclose = function(e){
+							console.log("["+(new Date()).Format("yyy-MM-dd hh:mm:ss.S")+"]:add_good close");
+							reDic(scode,"Supplier");
+							scode.value = "";
+						};
+					}
+				};
+				
+				mui("#save_order")[0].addEventListener("tap", function(e){
+					var args={};
+					args.ordercode=ordercode;
+					args.gcode=mui("#gcode")[0].value;
+					args.scode=mui("#scode")[0].value;
+					args.purchase_price=mui("#purchase_price")[0].value;
+					args.marked_price=mui("#marked_price")[0].value;
+					args.selling_price=mui("#selling_price")[0].value;
+					args.num_order=mui("#num_order")[0].value;
+					console.log("actType="+actType);
+					if(actType=="add"){
+						dh.addOrder(args,function(_orderid){
+							cur.close();
+						});
+					}else if(actType=="update"){
+						args.orderid = orderid;
+						dh.updateOrder(args,function(_orderid){
+							cur.close();
+						});
+					}else{
+						
+					}
+				});
+				
+				var calculatePrice = function(e){
+					var selling_price=mui("#selling_price")[0].value,num_order=mui("#num_order")[0].value;
+					mui("#sum_price")[0].textContent = math.multiply(Number(selling_price),Number(num_order));
+				};
+				
+				mui("#selling_price")[0].onchange = calculatePrice;
+				mui("#num_order")[0].onchange = calculatePrice;
+      	},false);}
     </script>
 </head>
 <body>
 	<div class="mui-content">
-		<h4>订单号：<span id="ordercode">XXXX</span></h4>
+		<h4>订单号：<span id="ordercode"></span></h4>
 		<form action="" method="post" class="mui-input-group">
 			<div id="good_name" class="mui-input-row">
 				<label>商品：</label>
@@ -83,23 +137,30 @@
 					<option value="add" class="dm-not-remove">+++新增+++</option>
 				</select>
 			</div>
-			<div id="good_num" class="mui-input-row">
-				<label>入货价：</label>
-				<input type="text" name="purchase_price" id="purchase_price" value="30￥" />
+			<div class="mui-input-row dm-input-row">
+				<label>入货价（￥）：</label>
+				<input type="text" name="purchase_price" id="purchase_price" value="" />
+			</div>
+			<div class="mui-input-row dm-input-row">
+				<label>标价（￥）：</label>
+				<input type="text" name="marked_price" id="marked_price" value="" />
 			</div>
 			<span>
 				商品订单：
 			</span>
-			<div class="mui-input-row">
-				<label>数量：</label>
-				<input type="text" name="num_order" id="num_order" value="5" />
+			<div class="mui-input-row dm-input-row">
+				<label>单售价（￥）：</label>
+				<input type="text" name="selling_price" id="selling_price" value="" />
 			</div>
-			<div class="mui-input-row">
-				<label>运费：</label>
-				<input type="text" name="freight" id="freight" value="5￥" />
+			<div class="mui-input-row dm-input-row">
+				<label>数量：</label>
+				<input type="text" name="num_order" id="num_order" value="" />
 			</div>
 		</form>
-		<a href="" class="mui-btn mui-btn-block mui-btn-primary">确定</a>
+			<h4>
+				合计（￥）：<span id="sum_price"></span>
+			</h4>
+		<a href="##" class="mui-btn mui-btn-block mui-btn-primary" id="save_order">确定</a>
 	</div>
 </body>
 </html>

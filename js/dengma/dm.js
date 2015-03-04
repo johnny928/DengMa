@@ -48,6 +48,7 @@ Dmdb.prototype = {
 									ordercode:'TEXT(50) NOT NULL',
 									ccode:'TEXT(20) NOT NULL',
 									createtime:'TEXT(19) NOT NULL',
+									freight:'INTEGER',
 									updatetime:'TEXT(19)'}}
 	],
 	getFromA: function(arr,key){

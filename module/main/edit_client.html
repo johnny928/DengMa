@@ -12,71 +12,72 @@
     <script type="text/javascript" charset="utf-8">
       	mui.init();
       	window.onload = function(){
-      		if(!mui.currentWebview) mui.currentWebview=getArgs();
-      		console.log("extras:"+mui.currentWebview.cid);
-      		var id=mui.currentWebview.cid,isInsert=true;
-      		var mydb = new Dmdb();
-      		var ccode = document.getElementById("ccode");
-      		var cname = document.getElementById("cname");
-  			var desc = document.getElementById("desc");
-  			var client_id = document.getElementById("client_id"); 
-  			id = id?id:client_id.value;
-      		client_id.value = id;
-  			var refresh = function(){
-  				console.log("["+new Date()+"] refresh.");
-  				if(id){
-  				mydb.tableCon("Clients",function(){
-  					var g = mydb.DB.instance("Clients");
-  					g.get("id==="+id,function(row){
-  						console.log(row);
-  						if(row.length>0){
-  							ccode.value=row[0]["ccode"];
-  							cname.value=row[0]["cname"];
-	  						desc.value=row[0]["desc"];
-	  						client_id.value=id;
-  						}
-  					});
-  				});
-	  			}
-  			};
-  			refresh();
-      		document.getElementById("clients_finish").onclick = function(){
-      			var clients = {
-      				id:"",
-      				ccode:ccode.value,
-      				cname:cname.value,
-      				desc:desc.value
-      			};
-      			if(id){
-      				isInsert = false;
-      			}else{
-      				isInsert = true;
-      			}
-      			mydb.tableCon("Clients",function(){
-  					var g = mydb.DB.instance("Clients");
-  					mydb.DB.query("select seq+1 seq from sqlite_sequence where name=?",["Clients"],
-  					function(arr){
-  						console.log(arr);
-  						if(isInsert){
-  							id=arr[0]?arr[0]["seq"]:1;
-  							client_id.value=id;
-  							clients["id"]=id;
-  							clients["ccode"]="C"+(new Date().Format("yyyyMMdd"))+("00000"+id).substr((""+id).length);
-  							clients["createtime"]=new Date().Format("yyyy-MM-dd hh:mm:ss");
-  						}else{
-  							clients["id"]=client_id.value;
-  							clients["ccode"]=ccode.value;
-  							clients["updatetime"]=new Date().Format("yyyy-MM-dd hh:mm:ss");
-  						}
-  						console.log(new Date().Format("yyyy-MM-dd hh:mm:ss")+":[save]"+clients)
-  						g.save(clients,"id",function(){
-							//mui.currentWebview.close();
-							refresh();
-  						});
-  					});
-  				});
-      		};
-      	};
+      		document.addEventListener("plusready",function(){
+      			var cur = plus.webview.currentWebview();
+	      		console.log("extras:"+cur.cid);
+	      		var id=cur.cid,isInsert=true;
+	      		var mydb = new Dmdb();
+	      		var ccode = document.getElementById("ccode");
+	      		var cname = document.getElementById("cname");
+	  			var desc = document.getElementById("desc");
+	  			var client_id = document.getElementById("client_id"); 
+	  			id = id?id:client_id.value;
+	      		client_id.value = id;
+	  			var refresh = function(){
+	  				console.log("["+new Date()+"] refresh.");
+	  				if(id){
+	  				mydb.tableCon("Clients",function(){
+	  					var g = mydb.DB.instance("Clients");
+	  					g.get("id==="+id,function(row){
+	  						console.log(row);
+	  						if(row.length>0){
+	  							ccode.value=row[0]["ccode"];
+	  							cname.value=row[0]["cname"];
+		  						desc.value=row[0]["desc"];
+		  						client_id.value=id;
+	  						}
+	  					});
+	  				});
+		  			}
+	  			};
+	  			refresh();
+	      		document.getElementById("clients_finish").addEventListener("tap", function(){
+	      			var clients = {
+	      				id:"",
+	      				ccode:ccode.value,
+	      				cname:cname.value,
+	      				desc:desc.value
+	      			};
+	      			if(id){
+	      				isInsert = false;
+	      			}else{
+	      				isInsert = true;
+	      			}
+	      			mydb.tableCon("Clients",function(){
+	  					var g = mydb.DB.instance("Clients");
+	  					mydb.DB.query("select seq+1 seq from sqlite_sequence where name=?",["Clients"],
+	  					function(arr){
+	  						console.log(arr);
+	  						if(isInsert){
+	  							id=arr[0]?arr[0]["seq"]:1;
+	  							client_id.value=id;
+	  							clients["id"]=id;
+	  							clients["ccode"]="C"+(new Date().Format("yyyyMMdd"))+("00000"+id).substr((""+id).length);
+	  							clients["createtime"]=new Date().Format("yyyy-MM-dd hh:mm:ss");
+	  						}else{
+	  							clients["id"]=client_id.value;
+	  							clients["ccode"]=ccode.value;
+	  							clients["updatetime"]=new Date().Format("yyyy-MM-dd hh:mm:ss");
+	  						}
+	  						console.log(new Date().Format("yyyy-MM-dd hh:mm:ss")+":[save]"+clients)
+	  						g.save(clients,"id",function(){
+								cur.close();
+								//refresh();
+	  						});
+	  					});
+	  				});
+	      		});
+      	},false);};
     </script>
 </head>
 <body>

@@ -8,235 +8,220 @@
     <script src="../../js/db/websqlwrapper.js"></script>
     <script src="../../js/dengma/common.js"></script>
     <script src="../../js/dengma/dm.js"></script>
+    <script src="../../js/dengma/dm-form.js"></script>
     <script src="../../js/dengma/dm-dbcontrol.js"></script>
     <link href="../../css/mui.min.css" rel="stylesheet"/>
+    <style>
+    	#query {
+    		border-bottom: 1px solid rgba(0,0,0,.2);
+    		margin: 0px;
+    		padding: 0px;
+    	}
+    	#query * {
+    		margin-bottom: 0px;
+    		margin-top: 0px;
+    		border: none;
+    	}
+    	#query select {
+    		width: 25%;
+    	}
+    	#query input {
+    		width: 40%;
+    	}
+    	#query span {
+    		font-size:medium;
+    	}
+    	.dm-title {
+    		width: 100%;
+    		background-color: rgb(216, 216, 216);
+    		margin: 0px;
+    		padding: 0px;
+    		font-size: 16px;
+    		font-weight:bold;
+    	}
+    </style>
     <script type="text/javascript" charset="utf-8">
       	mui.init();
-      	mui.plusReady(function() {
-			//首页返回键处理
-			//处理逻辑：1秒内，连续两次按返回键，则退出应用；
-			var first = null;
-			plus.key.addEventListener('backbutton', function(){
-				//首次按键，提示‘再按一次退出应用’
-				if(!first){
-					first = new Date().getTime();
-					mui.toast('再按一次退出应用');
-					setTimeout(function(){
-						first = null;
-					},1000);
-				}else{
-					if(new Date().getTime()-first<1000){
-						plus.runtime.quit();
-					}
-				}
-			}, false);
-			
-			var goods_1 = document.getElementById("goods_1");
-			goods_1.addEventListener('tap', function() {
-				console.log("here1");
-			  //打开关于页面
-			  mui.openWindow({
-			    url: 'add_order.html', 
-			    id:'goods_1',
-			    extras:{
-			    	gid:1
-			    }
-			  });
-			});
-		});
 		window.onload = function(){
-      		console.log("window onload main ");
-      		var mydm = new Dmdb();
-      		var dh = DbHelper.instance(mydm.init());
-      		var olist = document.getElementById("order_list");
-      		console.log(mui("#order_list li").length);
-      		var btn_queryByDay = function(){
-      			var g = dh.queryOrderByDate({begin:"2015-01-01",end:"2015-02-01",orderby:"desc"},function(r){
-	      			var i=0,k=0,oli=mui("#order_list li");
-	      			for(i=0;i<oli.length;i++){
+			document.addEventListener("plusready",function(){
+				var backhandel=function() {
+					//首页返回键处理
+					//处理逻辑：1秒内，连续两次按返回键，则退出应用；
+					var first = null;
+					plus.key.addEventListener('backbutton', function(){
+						//首次按键，提示‘再按一次退出应用’
+						if(!first){
+							first = new Date().getTime();
+							mui.toast('再按一次退出应用');
+							setTimeout(function(){
+								first = null;
+							},1000);
+						}else{
+							if(new Date().getTime()-first<1000){
+								plus.runtime.quit();
+							}
+						}
+					}, false);
+					
+				}();
+	      		console.log("window onload main ");
+	      		var mydm = new Dmdb();
+	      		var dh = DbHelper.instance(mydm.init());
+	      		var olist = mui("#order_list")[0];
+	      		var cur = plus.webview.currentWebview();
+	      		var query_date=cur.query_date,query_type=cur.query_type;
+	      		
+	      		if(!query_type){
+	      			query_type = "date";
+	      			query_date = (new Date()).Format("yyyy-MM-dd");
+	      		}
+      			mui("#query_type")[0].value = query_type;
+      			mui("#query_date")[0].type = query_type;
+      			mui("#query_date")[0].value = query_date;
+	      		window.addEventListener('refresh',btn_queryByDay);
+	      		
+	      		console.log(mui("#order_list li").length);
+	      		var btn_queryByDay = function(args){
+	      			var q_date=args?args.query_date:"",q_type=args?args.query_type:"",v_arg={};
+	      			var oli=mui("#order_list li");
+	      			if(!q_type){
+	      				q_type = mui("#query_type")[0].value;
+	      				q_date = mui("#query_date")[0].value;
+	      			}
+	      			console.log("q_date="+q_date);
+	      			q_date = new Date(q_date);
+	      			console.log("date q_date="+q_date);
+	      			var lastday=(getLastDay(q_date.getFullYear(),q_date.getMonth()+1));
+	      			if(q_type=="date"){
+	      				v_arg.begin = q_date.Format("yyyy-MM-dd");
+	      				v_arg.end = q_date.Format("yyyy-MM-dd");
+	      			}else if(q_type=="month"){
+	      				v_arg.begin = q_date.Format("yyyy-MM-dd");
+	      				v_arg.end = (new Date(q_date.getFullYear(),q_date.getMonth(),lastday)). Format("yyyy-MM-dd");
+	      			}else{
+	      				v_arg.begin = q_date.Format("yyyy-MM-dd");
+	      				v_arg.end = (new Date(q_date.getFullYear(),q_date.getMonth()+11,lastday)). Format("yyyy-MM-dd");
+	      			}
+	      			v_arg.orderby = "desc";
+	      			for(var i=0;i<oli.length;i++){
 	      				if(oli[i].classList.contains("dm-data")){
 	      					oli[i].remove();
 	      				}
 	      			}
-	      			for(i=0;i<r.length;i++){
-	      				var eli = document.createElement("li");
-	      				eli.className ='dm-data mui-table-view-cell mui-media';
-	      				var ea = document.createElement("a");
-	      				ea.href="##";
-	      				ea.id = r[i].ordercode;
-	      				var ediv = document.createElement("div");
-	      				ediv.className = "mui-media-body";
-	      				ediv.innerHTML = r[i].ordercode;
-	      				for(k=0;k<r[i].glist.length;k=k+2){
-	      					var str = r[i].glist[k].gname+"【"+r[i].glist[k].num_order+"】";
-	      					if(r[i].glist[k+1]){
-	      						str = str+"\t"+r[i].glist[k+1].gname+"【"+r[i].glist[k+1].num_order+"】";
-	      					}
-	      					var p_tem = document.createElement("p");
-							p_tem.className="mui-ellipsis";
-							p_tem.textContent=str;
-							ediv.appendChild(p_tem);
-		      				console.log("--->["+r[i].glist[k].gname+"]"+"["+r[i].glist[k].num_order+"]");
+	      			var g = dh.queryOrderByDate(v_arg,function(r){
+	      				dh.queryProfitByDate(v_arg,function(arr){
+	      					mui("#lr")[0].innerHTML = arr[0].profit;
+	      					mui("#mcds")[0].innerHTML = arr[0].mcds;
+	      				});
+		      			var i=0,k=0;
+		      			var eli,ea,ediv,p_tem,edel_btn;
+		      			for(i=0;i<r.length;i++){
+		      				eli = document.createElement("li");
+		      				eli = createDom("li",{className:"dm-data mui-table-view-cell mui-media"});
+		      				ea = createDom("a",{href:"##",id:r[i].ordercode});
+		      				edel_btn = createDom("a",{className:"mui-btn mui-btn-negative",id:r[i].ordercode,innerHTML:"删除"});
+		      				ea.onclick = function(e){
+	      						//打开关于页面
+								mui.openWindow({
+									url: 'total_order.html', 
+									id:'edit_order',
+									extras:{
+										ordercode:this.id
+									}
+								});
+		      				};
+		      				edel_btn.onclick = function(e){
+	      						//打开关于页面
+	      						var v_confirm = confirm("确定要删除：\n订单号：【"+this.id+"】\n的信息吗？");
+	      						if(v_confirm){
+	      							dh.deleteOrder({ordercode:this.id},function(){
+	      								btn_queryByDay();
+	      							});
+	      						}
+		      				};
+		      				
+		      				ediv = createDom("div",{className:"mui-media-body",innerHTML:r[i].ordercode});
+		      				for(k=0;k<r[i].glist.length;k=k+2){
+		      					var str = r[i].glist[k].gname+"【"+r[i].glist[k].num_order+"】";
+		      					if(r[i].glist[k+1]){
+		      						str = str+"\t"+r[i].glist[k+1].gname+"【"+r[i].glist[k+1].num_order+"】";
+		      					}
+		      					p_tem = createDom("p",{className:"mui-ellipsis",textContent:str});
+								ediv.appendChild(p_tem);
+			      				console.log("--->["+r[i].glist[k].gname+"]"+"["+r[i].glist[k].num_order+"]");
+			      			}
+		      				
+		      				ea.appendChild(ediv);
+		      				eli.appendChild(ea);
+		      				eli.appendChild(edel_btn);
+		      				olist.appendChild(eli);
 		      			}
-	      				ea.appendChild(ediv);
-	      				eli.appendChild(ea);
-	      				olist.appendChild(eli);
+		      		});
+	      		};
+	      		btn_queryByDay();
+	      		
+	      		
+	      		mui("#create_order")[0].onclick = function(e){
+					//打开关于页面
+					mui.openWindow({
+						url: 'total_order.html', 
+						id:'main_create_order',
+						extras:{}
+					});
+	      		};
+	      		
+	      		mui("#query_type")[0].onchange = function(e){
+	      			console.log(this.value);
+	      			if(this.value=="date"){
+	      				mui("#query_date")[0].type = "date";
+	      				mui("#query_date")[0].value = (new Date()).Format("yyyy-MM-dd");
+	      			}else if(this.value=="month"){
+	      				mui("#query_date")[0].type = "month";
+	      				mui("#query_date")[0].value = (new Date()).Format("yyyy-MM");
+	      			}else if(this.value=="text"){
+	      				mui("#query_date")[0].type = "text";
+	      				mui("#query_date")[0].value = (new Date()).Format("yyyy");
 	      			}
-	      			console.log("r="+r);
-	      			console.log("["+r[0].ordercode+"]"+"["+r[0].cname+"]"+"["+r[0].totalprice+"]");
-	      			for(i=0;i<r[0].glist.length;i++){
-	      				console.log("--->["+r[0].glist[i].gname+"]"+"["+r[0].glist[i].num_order+"]");
-	      			}
-	      		});
-      		}();
-      		
-      	}
-//		window.onload = function(){
-//			var goods_1 = document.getElementById("goods_1");
-//			goods_1.addEventListener('tap', function() {
-//				console.log("here2");
-//			  //打开关于页面
-//			  mui.openWindow({
-//			    url: 'edit_goods.html', 
-//			    id:'goods_1'
-//			  });
-//			});
-//		};
+	      			btn_queryByDay({query_date:mui("#query_date")[0].value,query_type:mui("#query_type")[0].value});
+	      		};
+	      		
+	      		mui("#query_date")[0].onchange = function(e){
+	      			console.log("query_date onchange");
+	      			btn_queryByDay({query_date:mui("#query_date")[0].value,query_type:mui("#query_type")[0].value});
+	      		};
+	      		mui("#query_refresh")[0].onclick = function(e){
+	      			btn_queryByDay({query_date:mui("#query_date")[0].value,query_type:mui("#query_type")[0].value});
+	      		};
+      	},false);}
     </script>
 </head>
 <body>
 	<div class="mui-content-padded" >
-		<div id="main_head">
-			<h2><font color="#007AFF">利润：<span id="lr"></span>￥</font></h2>
-			<h4>卖出：<span id="mcds"></span>单</h4>
+		<div id="query" >
+			<select name="query_type" id="query_type" >
+				<option value="date" selected="true">查询日：</option>
+				<option value="month" >查询月：</option>
+				<option value="text" >查询年：</option>
+			</select>
+			<input type="date" id="query_date" />
+			<i class="mui-icon mui-icon-arrowdown"></i>
+			<span class="mui-icon mui-icon-loop" id="query_refresh">刷新</span>
 		</div>
-		<div id="searcher" class="mui-input-row mui-search">
-			<input type="search" name="" id="" value="" placeholder="查找产品"/>
-		</div>
-		<div id="sort">
-			<button class="mui-btn">日期<span class="mui-icon mui-icon-arrowup"></span></button>
-			<button class="mui-btn">销量<span class="mui-icon mui-icon-arrowup"></span></button>
-			<button class="mui-btn">货存<span class="mui-icon mui-icon-arrowup"></span></button>
-		</div>
-		<div id="list">
-			<ul class="mui-table-view" id="order_list">
-				<li class="mui-table-view-cell mui-hidden">cared
-					<div id="M_Toggle" class="mui-switch mui-active">
-						<div class="mui-switch-handle">
-							
-						</div>
+		<div style="clear: both;"></div>
+		<h2><font color="#007AFF">利润：<span id="lr"></span>￥</font>
+		</h2>
+		<h4>卖出单数：<span id="mcds"></span></h4>
+		<div class="dm-title">订单列表：</div>
+		<a href="##" class="mui-btn mui-btn-block mui-btn-primary" id="create_order">添加</a>
+		<ul class="mui-table-view" id="order_list">
+			<li class="mui-table-view-cell mui-hidden">cared
+				<div id="M_Toggle" class="mui-switch mui-active">
+					<div class="mui-switch-handle">
+						
 					</div>
-				</li>
-				<li class="dm-data mui-table-view-cell mui-media">
-					<a href="##" id="goods_1">
-						<div class="mui-media-body">
-							O-X1
-							<p class='mui-ellipsis'>澳洲奶粉1段【5】	木瓜膏【6】</p>
-							<p class='mui-ellipsis'>澳洲奶粉1段【5】	木瓜膏【6】</p>
-						</div>
-					</a>
-				</li>
-				<li class="dm-data mui-table-view-cell mui-media">
-					<a href="#">
-						<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/shuijiao.jpg">
-						<div class="mui-media-body">
-							XXX奶粉
-							<p class='mui-ellipsis'>能和心爱的人一起睡觉，是件幸福的事情；可是，打呼噜怎么办？</p>
-						</div>
-					</a>
-				</li>
-				<li class="dm-data mui-table-view-cell mui-media">
-					<a href="#">
-						<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/shuijiao.jpg">
-						<div class="mui-media-body">
-							XXX奶粉
-							<p class='mui-ellipsis'>能和心爱的人一起睡觉，是件幸福的事情；可是，打呼噜怎么办？</p>
-						</div>
-					</a>
-				</li>
-				<li class="dm-data mui-table-view-cell mui-media">
-					<a href="#">
-						<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/shuijiao.jpg">
-						<div class="mui-media-body">
-							XXX奶粉
-							<p class='mui-ellipsis'>能和心爱的人一起睡觉，是件幸福的事情；可是，打呼噜怎么办？</p>
-						</div>
-					</a>
-				</li>
-				<li class="dm-data mui-table-view-cell mui-media">
-					<a href="#">
-						<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/shuijiao.jpg">
-						<div class="mui-media-body">
-							XXX奶粉
-							<p class='mui-ellipsis'>能和心爱的人一起睡觉，是件幸福的事情；可是，打呼噜怎么办？</p>
-						</div>
-					</a>
-				</li>
-				<li class="dm-data mui-table-view-cell mui-media">
-					<a href="#">
-						<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/shuijiao.jpg">
-						<div class="mui-media-body">
-							XXX奶粉
-							<p class='mui-ellipsis'>能和心爱的人一起睡觉，是件幸福的事情；可是，打呼噜怎么办？</p>
-						</div>
-					</a>
-				</li>
-				<li class="dm-data mui-table-view-cell mui-media">
-					<a href="#">
-						<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/shuijiao.jpg">
-						<div class="mui-media-body">
-							XXX奶粉
-							<p class='mui-ellipsis'>能和心爱的人一起睡觉，是件幸福的事情；可是，打呼噜怎么办？</p>
-						</div>
-					</a>
-				</li>
-				<li class="dm-data mui-table-view-cell mui-media">
-					<a href="#">
-						<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/shuijiao.jpg">
-						<div class="mui-media-body">
-							XXX奶粉
-							<p class='mui-ellipsis'>能和心爱的人一起睡觉，是件幸福的事情；可是，打呼噜怎么办？</p>
-						</div>
-					</a>
-				</li>
-				<li class="dm-data mui-table-view-cell mui-media">
-					<a href="#">
-						<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/shuijiao.jpg">
-						<div class="mui-media-body">
-							XXX奶粉
-							<p class='mui-ellipsis'>能和心爱的人一起睡觉，是件幸福的事情；可是，打呼噜怎么办？</p>
-						</div>
-					</a>
-				</li>
-				<li class="dm-data mui-table-view-cell mui-media">
-					<a href="#">
-						<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/shuijiao.jpg">
-						<div class="mui-media-body">
-							XXX奶粉
-							<p class='mui-ellipsis'>能和心爱的人一起睡觉，是件幸福的事情；可是，打呼噜怎么办？</p>
-						</div>
-					</a>
-				</li>
-				<li class="dm-data mui-table-view-cell mui-media">
-					<a href="#">
-						<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/shuijiao.jpg">
-						<div class="mui-media-body">
-							XXX奶粉
-							<p class='mui-ellipsis'>能和心爱的人一起睡觉，是件幸福的事情；可是，打呼噜怎么办？</p>
-						</div>
-					</a>
-				</li>
-				<li class="dm-data mui-table-view-cell mui-media">
-					<a href="#">
-						<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/shuijiao.jpg">
-						<div class="mui-media-body">
-							XXX奶粉
-							<p class='mui-ellipsis'>能和心爱的人一起睡觉，是件幸福的事情；可是，打呼噜怎么办？</p>
-						</div>
-					</a>
-				</li>
-			</ul>
-		</div>
+				</div>
+			</li>
+		</ul>
 	</div>
 </body>
 </html>
