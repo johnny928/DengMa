@@ -6,75 +6,89 @@
     <title>Menu</title>
     <script src="../../js/mui.min.js"></script>
     <link href="../../css/mui.min.css" rel="stylesheet"/>
-    <script type="text/javascript" charset="utf-8">
-      	mui.init();
-      	mui.plusReady(function() {
-			console.log("ee");
-			//首页返回键处理
-			//处理逻辑：1秒内，连续两次按返回键，则退出应用；
-			var first = null;
-			plus.key.addEventListener('backbutton', function(){
-				//首次按键，提示‘再按一次退出应用’
-				if(!first){
-					first = new Date().getTime();
-					mui.toast('再按一次退出应用');
-					setTimeout(function(){
-						first = null;
-					},1000);
-				}else{
-					if(new Date().getTime()-first<1000){
-						plus.runtime.quit();
-					}
-				}
-			}, false);
-		});
-    </script>
+    		<style>
+			body, .mui-content {
+				background-color: #333;
+				color: #fff;
+			}
+			header.mui-bar{
+				display: none;
+			}
+			.mui-bar-nav~.mui-content{
+				padding: 0;
+			}
+			 .title{
+			  	margin: 35px 15px 10px;
+			  }
+			 .title span{
+			  	color:#DD524D;
+			  }
+			  .title+.content{
+			  	margin: 10px 15px 35px;
+			  	color: #bbb;
+			  	text-indent: 1em;
+			  	font-size: 14px;
+			  	line-height: 24px;
+			  }
+			  .mui-table-view{
+			  	margin-bottom: 35px;
+			  }
+		</style>
+	<script type="text/javascript" charset="utf-8">
+			mui.init({
+				swipeBack:false
+			});
+			//获得侧滑主窗口webview对象
+			var main = null;
+			mui.plusReady(function () {
+				main = plus.webview.currentWebview().opener();
+				
+			})
+			function closeMenu () {
+				mui.fire(main,"menu:swipeleft");
+			}
+			//优化显示出来的侧滑菜单，只需监听该菜单的左滑事件，然后将其关闭即可；在菜单上右滑，不做任何操作；
+			window.addEventListener("swipeleft",closeMenu);  
+		</script>
 </head>
 <body>
 	<header class="mui-bar mui-bar-nav">
-		<h1 class="mui-title">菜单</h1>
+		<h1 class="mui-title">登妈代购</h1>
 	</header>
 	<div class="mui-content">
-		<div class="mui-card">
-			<ul class="mui-table-view mui-grid-view mui-grid-9">
-				<li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-3">
-					<a href="#">
-						<span class="mui-icon mui-icon-home"></span>
-						<div class="mui-media-body">销售情况</div>
-					</a>
-				</li>
-				<li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-3">
-					<a href="#">
-						<span class="mui-icon mui-icon-email"></span>
-						<div class="mui-media-body">订单录入</div>
-					</a>
-				</li>
-				<li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-3">
-					<a href="#">
-						<span class="mui-icon mui-icon-chatbubble"></span>
-						<div class="mui-media-body">订单查询</div>
-					</a>
-				</li>
-				<li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-3">
-					<a href="#">
-						<span class="mui-icon mui-icon-location"></span>
-						<div class="mui-media-body">库存管理</div>
-					</a>
-				</li>
-				<li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-3">
-					<a href="#">
-						<span class="mui-icon mui-icon-search"></span>
-						<div class="mui-media-body">供应商管理</div>
-					</a>
-				</li>
-				<li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-3">
-					<a href="#">
-						<span class="mui-icon mui-icon-phone"></span>
-						<div class="mui-media-body">顾客信息管理</div>
-					</a>
-				</li>
-			</ul>
+			<div class="title"><span>登妈代购</span></div>
+				<ul class="mui-table-view mui-table-view-chevron mui-table-view-inverted">
+					<li class="mui-table-view-cell">
+						<a class="mui-navigate-right">
+							销售情况
+						</a>
+					</li>
+					<li class="mui-table-view-cell">
+						<a class="mui-navigate-right">
+							订单录入
+						</a>
+					</li>
+					<li class="mui-table-view-cell">
+						<a class="mui-navigate-right">
+							订单查询
+						</a>
+					</li>
+					<li class="mui-table-view-cell">
+						<a class="mui-navigate-right">
+							库存管理
+						</a>
+					</li>
+					<li class="mui-table-view-cell">
+						<a class="mui-navigate-right">
+							供应商管理
+						</a>
+					</li>
+					<li class="mui-table-view-cell">
+						<a class="mui-navigate-right">
+							顾客信息管理
+						</a>
+					</li>
+				</ul>
 		</div>
-	</div>
 </body>
 </html>

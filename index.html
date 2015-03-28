@@ -4,36 +4,28 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
     <title>DengMa</title>
-    <script src="js/mui.min.js"></script>
+    
+</head>
+<body>
+	<header class="mui-bar mui-bar-nav">
+		<a class="mui-icon mui-icon-bars mui-pull-left"></a>
+		<h1 class="mui-title">登妈代购</h1>
+	</header>
+	<script src="js/mui.min.js"></script>
     <script src="js/dengma/dm.js"></script>
     <script src="js/db/websqlwrapper.js"></script>
     <link href="css/mui.min.css" rel="stylesheet"/>
     <script type="text/javascript" charset="utf-8">
-      	mui.init({
-      		swipeBack : false,
-      		subpages : [{
-    			id : "module/main/main.html",
-    			url : "module/main/main.html",
-      			styles : {
-						top : '48px',
-						bottom : 0,
-						bounce :'vertical'
-						//scrollIndicator : "none"
-					}
-      		}]
+      	document.addEventListener("plusready",function(){
+      		mui.openWindow({
+				url: 'module/main/main.html', 
+				id:'main',
+				styles: {
+					zindex: 9999
+				}
+			});
       	});
-      	window.onload = function(){
-      		console.log("window onload index ");
-      	}
-      	mui.plusReady(function(){
-      		console.log("plusReady");
-      	});
-      	
+
     </script>
-</head>
-<body>
-	<header class="mui-bar mui-bar-nav">
-		<h1 class="mui-title">登妈代购</h1>
-	</header>
 </body>
 </html>
